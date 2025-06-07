@@ -22,7 +22,7 @@ Packaging:
 
 # 25.06 (2025-06-30)
 
-checkpoint <https://github.com/helix-editor/helix/compare/626407395a9beb65b1d7e353418676820d47afb4...master>
+checkpoint <https://github.com/helix-editor/helix/compare/f4b488e380e28aa36a06ad400d6656fa864ba5b7...master>
 
 Breaking changes:
 
@@ -31,15 +31,23 @@ Features:
 * Add a picker which explores directories (#11285, d4aed40)
 * Allow cycling through multiple LSP Hover responses with `A-n`/`A-p` (#10122, 2367b20)
 * Add support for incomplete LSP completions (5c1f3f8)
-* The parsing of the command line has been rewritten and now supports flags and expansions (#12527, #13018, 9574e55, 2d4c2a1, #13192)
+* The parsing of the command line has been rewritten and now supports flags and expansions (#12527, #13018, 9574e55, 2d4c2a1, #13192, 67f1fe2)
 * Add support for EditorConfig (#13056)
-* Add support for LSP document colors (#12308, d43de14)
+* Add support for LSP document colors (#12308, d43de14, 47cdd23)
+* Support expansions in external formatter arguments (#13429)
+* Switch out the highlighter for the `tree-house` crate (#12972, 09bc67a, a7c3a43, 3ceae88, 05ae617, 5a1dcc2, ebf96bd, #13644, b1f4717, 7410fe3)
+    * This fixes a number of highlighter bugs.
+    * Locals like parameter highlights are now highlighted even when the definition is not in view.
+    * Markdown is now injected into rust doc comments (`///` and `//!`).
 
 Commands:
 
 * Add `copy_between_registers` for interactive copying between two registers (066e938)
 * Add `extend_to_file_{start,end}`, select-mode variants of `goto_file_{start,end}` (#11767)
 * Add `:!` alias for `:sh` and `:|` for `:pipe` (#13263)
+* Add `goto_column` and `extend_to_column` (#13440)
+* Add an `--insensitive`/`-i` flag to the `:sort` command (#13560)
+* Add `rotate_selections_first` and `rotate_selections_last` (#13615)
 
 Usability improvements:
 
@@ -59,7 +67,14 @@ Usability improvements:
 * Add a theme key for highlighting directories in completions and picker items (#12855, 7bebe0a)
 * Add `editor.trim-final-newlines` and `editor.trim-trailing-whitespace` config options (aa20eb8)
 * Warn when the configured theme is unusable because true-color is not available (#13058)
-* Allow configuring `[workspace-]diagnostic` statusline element severities (#13288)
+* Allow configuring `[workspace-]diagnostic` statusline element severities (#13288, b0528bb)
+* Improve completion for shell commands (#12883)
+* Add `%{language}` variable expansion (#13466)
+* Add `%{selection}` variable expansion (#13467)
+* Show the primary selection index in the `selections` statusline element when there are multiple selections (#12326)
+* Use configured language server names when possible in `--health` output (#13573)
+* Add a statusline element for indentation style (#13632)
+* Set the working directory of language server commands to the workspace root (#13691)
 
 Fixes:
 
@@ -81,6 +96,10 @@ Fixes:
 * Avoid inserting final newlines in empty files (67879a1)
 * Gracefully handle partial failure in multi-language-server requests (#13156, 14cab4b)
 * Improve LSP progress message display in the statusline (#13180)
+* Fix behavior of `<esc>` removing added indentation in documents with CRLF line endings (702a961)
+* Append changes to document history before pushing jumplist jumps (#13619)
+* Fix overflow in the display of large chunks of text in the signature-help component (#13566)
+* Fix panic from clearing whitespace when changing multiple selections on one line (#13673)
 
 Themes:
 
@@ -106,10 +125,16 @@ Themes:
 * Update gruvbox themes (#13315)
 * Update serika themes (#13341)
 * Add `gruvbox-material` (#13311)
-* Add `ashen` (#13366) (was removed? not showing up in `:theme`??)
+* Add `ashen` (#13366)
 * Update Zed themes (#13370)
 * Update Tokyonight themes (#13375)
 * Update `onelight` (#13413)
+* Add `ataraxia` (#13390)
+* Add `vesper` (#13394)
+* Add `kinda_nvim` and `kinda_nvim_light` (#13406)
+* Update `sonokai` (#13410)
+* Add `nyxvamp` themes (#12185)
+* Update nord themes (#13574)
 
 New languages:
 
@@ -128,6 +153,9 @@ New languages:
 * WESL (#13267)
 * Fennel (#13260)
 * Quarto (#13339)
+* Pug (#13435)
+* Slang (#13449)
+* Dunst config (#13458)
 
 Updated languages and queries:
 
@@ -158,7 +186,7 @@ Updated languages and queries:
 * Add block comment configuration for PHP (0ab403d)
 * Update Gren highlights (#12769)
 * Remove `ERROR` node highlighting from all highlight queries (16ff063)
-* Update tree-sitter-erlang (18b9eb9)
+* Update tree-sitter-erlang and highlights (18b9eb9, 9f3b193, 12139a4)
 * Update Nix injections (#12776, #12774)
 * Add indent queries for Nix (#12829)
 * Update Markdown highlights (#12696)
@@ -198,7 +226,28 @@ Updated languages and queries:
 * Update typescript highlights (#13250)
 * Update tree-sitter-jjdescription (#13329)
 * Add injection queries for Quint (#13322)
-* Update SCSS highlights (#13414)
+* Update tree-sitter-scss and highlights (#13414)
+* Update tree-sitter-go-mod (#13395)
+* Update tree-sitter-svelte (#13423)
+* Update Lua highlights (#13401)
+* Update Go highlights (#13425, 25b299a)
+* Recognize `.git-blame-ignore-revs` as gitignore (#13460)
+* Update Verilog highlights (#13473, #13493)
+* Update tree-sitter-v (#13469)
+* Update WGSL highlights (#13479)
+* Update Bash highlights (#13477)
+* Update tree-sitter-cpp (#13504)
+* Update rust-analyzer config to use server-side file watching (#13432)
+* Update Vue injections (#13511)
+* Recognize `sld` as Scheme (#13528)
+* Recognize more files as git-attributes (#13540)
+* Update tree-sitter-haskell and queries (#13475)
+* Align INI highlights with TOML (#13589)
+* Add tree-sitter-rust-format-args for `format_args!` injections in Rust (#13533, #13657, 4dd4ba7)
+* Update Ungrammar highlights (8d58f6c)
+* Add `ty` language server for Python (#13643)
+* Add `clarinet` language server for Clarity (#13647)
+* Update prisma config to avoid a crash in the language server (f6878f6)
 
 Packaging:
 
@@ -206,6 +255,7 @@ Packaging:
 * Refactor Nix flake (#12831, #13024, cb1ecc9, #13305)
 * Add `ConsoleOnly` to `Helix.desktop` categories (#13236)
 * Drop Nix flake dependency on flake-utils (60a03a3)
+* Increase the MSRV to 1.82 (#13275)
 
 # 25.01.1 (2025-01-19)
 
@@ -673,7 +723,7 @@ Updated languages and queries:
 - Recognize `hsc` as Haskell ([#11074](https://github.com/helix-editor/helix/pull/11074))
 - Fix heredoc and `$'<ansi_string>'` highlights in Bash ([#11118](https://github.com/helix-editor/helix/pull/11118))
 - Add LSP configuration for `basedpyright` ([#11121](https://github.com/helix-editor/helix/pull/11121))
-- Recognize `npmrc` and `.nmprc` files as INI ([#11131](https://github.com/helix-editor/helix/pull/11131))
+- Recognize `npmrc` and `.nmprc` files as INI ([#11131](https://github.com/helix-editor/helix/pull/11131)) with TOML (#13589)
 - Recognize `~/.config/git/ignore` as git-ignore ([#11131](https://github.com/helix-editor/helix/pull/11131))
 - Recognize `pdm.lock` and `uv.lock` as TOML ([#11131](https://github.com/helix-editor/helix/pull/11131))
 - Recognize `.yml` as well as `.yaml` for Helm chart templates ([#11135](https://github.com/helix-editor/helix/pull/11135))
@@ -929,7 +979,7 @@ Updated languages and queries:
 - Recognize 'mmd' as Mermaid ([459eb9a](https://github.com/helix-editor/helix/commit/459eb9a))
 - Highlight Rust extern crate aliases ([c099dde](https://github.com/helix-editor/helix/commit/c099dde))
 - Improve parameter highlighting in C++ ([f5d95de](https://github.com/helix-editor/helix/commit/f5d95de))
-- Recognize 'rclone.conf' as INI ([#9959](https://github.com/helix-editor/helix/pull/9959))
+- Recognize 'rclone.conf' as INI ([#9959](https://github.com/helix-editor/helix/pull/9959)) with TOML (#13589)
 - Add injections for GraphQL and ERB in Ruby heredocs ([#10036](https://github.com/helix-editor/helix/pull/10036))
 - Add `main.odin` to Odin LSP roots ([#9968](https://github.com/helix-editor/helix/pull/9968))
 
