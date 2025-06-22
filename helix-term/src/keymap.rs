@@ -7,12 +7,9 @@ use arc_swap::{
     ArcSwap,
 };
 use helix_view::{document::Mode, info::Info, input::KeyEvent};
-use serde::Deserialize;
+use serde::{de::Unexpected, Deserialize};
 use std::{
-    borrow::Cow,
-    collections::{BTreeSet, HashMap},
-    ops::{Deref, DerefMut},
-    sync::Arc,
+    borrow::Cow, collections::{BTreeSet, HashMap}, ops::{Deref, DerefMut}, str::FromStr, sync::Arc
 };
 
 pub use default::default;
@@ -80,7 +77,7 @@ impl KeyTrieNode {
                     if cmd.name() == "no_op" {
                         continue;
                     }
-                    cmd.doc()
+                    cmd.aliased_as().unwrap_or(cmd.doc())
                 }
                 KeyTrie::Node(n) => &n.name,
                 KeyTrie::Sequence(_) => "[Multiple commands]",
@@ -128,6 +125,14 @@ impl DerefMut for KeyTrieNode {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.map
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize, Hash, Eq)]
+pub enum KeyAliasField {
+    #[serde(alias = "cmd")]
+    Cmd,
+    #[serde(alias = "alias")]
+    Alias
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -198,12 +203,35 @@ impl<'de> serde::de::Visitor<'de> for KeyTrieVisitor {
         M: serde::de::MapAccess<'de>,
     {
         let mut mapping = HashMap::new();
-        let mut order = Vec::new();
-        while let Some((key, value)) = map.next_entry::<KeyEvent, KeyTrie>()? {
-            mapping.insert(key, value);
-            order.push(key);
+        while let Ok(Some((field, def))) = map.next_entry::<KeyAliasField, String>() {
+            mapping.insert(field, def);
         }
-        Ok(KeyTrie::Node(KeyTrieNode::new("", mapping, order)))
+        if !mapping.is_empty() {
+            let mut cmd = mapping.remove(&KeyAliasField::Cmd)
+                .ok_or(<M::Error as serde::de::Error>::missing_field("cmd"))?
+                .parse::<MappableCommand>().map_err(<M::Error as serde::de::Error>::custom)?;
+            cmd.set_alias(mapping.remove(&KeyAliasField::Alias));
+            return Ok(KeyTrie::MappableCommand(cmd))
+        }
+
+        let mut mapping = HashMap::new();
+        let mut order = Vec::new();
+        let mut name = "".to_string();
+        while let Ok(Some((key, value))) = map.next_entry::<String, toml::Value>() {
+            if key.as_str() == "name" {
+                if let toml::Value::String(s) = &value {
+                    name = s.clone();
+                } else {
+                    return Err(<M::Error as serde::de::Error>::invalid_type(Unexpected::Other("non_string"), &"string"))
+                }
+            } else {
+                let key = KeyEvent::from_str(key.as_str()).map_err(|e| <M::Error as serde::de::Error>::custom(e))?;
+                let value: KeyTrie = value.try_into().map_err(|e| <M::Error as serde::de::Error>::custom(e))?;
+                mapping.insert(key, value);
+                order.push(key);
+            }
+        }
+        Ok(KeyTrie::Node(KeyTrieNode::new(&name, mapping, order)))
     }
 }
 
@@ -603,6 +631,7 @@ mod tests {
                         name: "pipe".to_string(),
                         args: "sed -E 's/\\s+$//g'".to_string(),
                         doc: "".to_string(),
+                        aliased_as: None
                     },
                 })
             },
