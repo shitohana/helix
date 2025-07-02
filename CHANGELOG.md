@@ -20,9 +20,9 @@ Updated languages and queries:
 Packaging:
 -->
 
-# 25.06 (2025-06-30)
+# 25.07 (2025-07-12)
 
-checkpoint <https://github.com/helix-editor/helix/compare/171dfc60e5cda8f9fb6c4f662872f35bbe864a53...master>
+checkpoint <https://github.com/helix-editor/helix/compare/6a090471a800b1001bdfd2b6e0b710c1cd439a4e...master>
 
 Breaking changes:
 
@@ -31,14 +31,15 @@ Features:
 * Add a picker which explores directories (#11285, d4aed40)
 * Allow cycling through multiple LSP Hover responses with `A-n`/`A-p` (#10122, 2367b20)
 * Add support for incomplete LSP completions (5c1f3f8)
-* The parsing of the command line has been rewritten and now supports flags and expansions (#12527, #13018, 9574e55, 2d4c2a1, #13192, 67f1fe2)
-* Add support for EditorConfig (#13056)
+* The parsing of the command line has been rewritten and now supports flags and expansions (#12527, #13018, 9574e55, 2d4c2a1, #13192, 67f1fe2, #13466, #13467, #13840)
+* Add support for EditorConfig (#13056, #13443)
 * Add support for LSP document colors (#12308, d43de14, 47cdd23, ba54b6a)
 * Support expansions in external formatter arguments (#13429)
-* Switch out the highlighter for the `tree-house` crate (#12972, 09bc67a, a7c3a43, 3ceae88, 05ae617, 5a1dcc2, ebf96bd, #13644, b1f4717, 7410fe3, 633c5fb, 362e97e)
+* Switch out the highlighter for the `tree-house` crate (#12972, 09bc67a, a7c3a43, 3ceae88, 05ae617, 5a1dcc2, ebf96bd, #13644, b1f4717, 7410fe3, 633c5fb, 362e97e, #13828)
     * This fixes a number of highlighter bugs.
     * Locals like parameter highlights are now highlighted even when the definition is not in view.
     * Markdown is now injected into rust doc comments (`///` and `//!`).
+* Add support for the DAP `startDebugging` reverse request (#13403)
 
 Commands:
 
@@ -69,8 +70,6 @@ Usability improvements:
 * Warn when the configured theme is unusable because true-color is not available (#13058)
 * Allow configuring `[workspace-]diagnostic` statusline element severities (#13288, b0528bb)
 * Improve completion for shell commands (#12883)
-* Add `%{language}` variable expansion (#13466)
-* Add `%{selection}` variable expansion (#13467)
 * Show the primary selection index in the `selections` statusline element when there are multiple selections (#12326)
 * Use configured language server names when possible in `--health` output (#13573)
 * Add a statusline element for indentation style (#13632)
@@ -82,6 +81,7 @@ Usability improvements:
 * Show human-readable file sizes in the statusline message for file writes (#13627)
 * Add diagnostic source to the diagnosics pickers (#13758)
 * Show all active scopes under the cursor in `:tree-sitter-highlight-name` (4a85171)
+* Auto-close the LSP code-actions popup (#13832)
 
 Fixes:
 
@@ -110,6 +110,7 @@ Fixes:
 * Include formatting options in LSP range formatting request (#13734)
 * Consistently set statusline errors when LSP features are not available (#12577)
 * Fix `goto_file` on Windows (#13770)
+* Fix crash in `goto_word` (`gw`) when `editor.jump-label-alphabet` is configured to be empty (#13863)
 
 Themes:
 
@@ -146,6 +147,8 @@ Themes:
 * Add `nyxvamp` themes (#12185)
 * Update nord themes (#13574)
 * Add `lapis_aquamarine` (#13726)
+* Add `sidra` (#13575)
+* Add `dark-synthwave` (#13857)
 
 New languages:
 
@@ -162,12 +165,13 @@ New languages:
 * Werk (#13136)
 * Debian control file (#13245)
 * WESL (#13267)
-* Fennel (#13260)
+* Fennel (#13260, 6081a5d)
 * Quarto (#13339)
 * Pug (#13435)
 * Slang (#13449)
 * Dunst config (#13458)
 * Luau (#13702)
+* Caddyfile (#13859)
 
 Updated languages and queries:
 
@@ -199,7 +203,7 @@ Updated languages and queries:
 * Update Gren highlights (#12769)
 * Remove `ERROR` node highlighting from all highlight queries (16ff063)
 * Update tree-sitter-erlang and highlights (18b9eb9, 9f3b193, 12139a4)
-* Update Nix injections (#12776, #12774)
+* Update Nix injections (#12776, #12774, #13851)
 * Add indent queries for Nix (#12829)
 * Update Markdown highlights (#12696)
 * Recognize `xsl` as XML (#12834)
@@ -242,7 +246,7 @@ Updated languages and queries:
 * Update tree-sitter-go-mod (#13395)
 * Update tree-sitter-svelte (#13423)
 * Update Lua highlights (#13401)
-* Update Go highlights (#13425, 25b299a)
+* Update Go highlights (#13425, 25b299a, #13825)
 * Recognize `.git-blame-ignore-revs` as gitignore (#13460)
 * Update Verilog highlights (#13473, #13493)
 * Update tree-sitter-v (#13469)
@@ -275,6 +279,11 @@ Updated languages and queries:
 * Recognize Buck files as Starlark (#13810)
 * Use tree-sitter-crystal instead of tree-sitter-ruby for Crystal and add custom queries (#13805)
 * Update tree-sitter-twig (#13689)
+* Recognize `jsconfig.json` as JSONC, use as JavaScript and JSX roots (#13822)
+* Recognize `.gem/credentials` as YAML (#13843)
+* Update Dockerfile injections (#13845, 13852)
+* Change tree-sitter parser for Git commit message files (44293df)
+* Recognize `mimeapps.list` as INI (#13850)
 
 Packaging:
 
