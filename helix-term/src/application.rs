@@ -100,7 +100,7 @@ async fn start_unix_socket_listener(tx: mpsc::Sender<String>) {
 
     let path = match std::env::var("HELIX_SOCKET_PATH") {
         Ok(path) => path,
-        Err(_) => "/tmp/helix".to_string()
+        Err(_) => "/tmp/helix.sock".to_string()
     };
     if Path::new(&path).exists() {
         let _ = std::fs::remove_file(&path);
