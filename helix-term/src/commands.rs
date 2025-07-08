@@ -211,15 +211,18 @@ pub enum MappableCommand {
         name: String,
         args: String,
         doc: String,
+        aliased_as: Option<String>
     },
     Static {
         name: &'static str,
         fun: fn(cx: &mut Context),
         doc: &'static str,
+        aliased_as: Option<String>
     },
     Macro {
         name: String,
         keys: Vec<KeyEvent>,
+        aliased_as: Option<String>
     },
 }
 
@@ -230,7 +233,8 @@ macro_rules! static_commands {
             pub const $name: Self = Self::Static {
                 name: stringify!($name),
                 fun: $name,
-                doc: $doc
+                doc: $doc,
+                aliased_as: None
             };
         )*
 
@@ -243,7 +247,7 @@ macro_rules! static_commands {
 impl MappableCommand {
     pub fn execute(&self, cx: &mut Context) {
         match &self {
-            Self::Typable { name, args, doc: _ } => {
+            Self::Typable { name, args, doc: _, aliased_as: _ } => {
                 if let Some(command) = typed::TYPABLE_COMMAND_MAP.get(name.as_str()) {
                     let mut cx = compositor::Context {
                         editor: cx.editor,
@@ -294,6 +298,22 @@ impl MappableCommand {
             Self::Static { doc, .. } => doc,
             Self::Macro { name, .. } => name,
         }
+    }
+
+    pub fn aliased_as(&self) -> Option<&str> {
+        match &self {
+            Self::Typable { aliased_as, .. } => aliased_as,
+            Self::Static { aliased_as, .. } => aliased_as,
+            Self::Macro { aliased_as, .. } => aliased_as,
+        }.as_ref().map(String::as_str)
+    }
+
+    pub fn set_alias(&mut self, alias: Option<String>) {
+        match self {
+            Self::Typable { aliased_as, .. } => std::mem::replace(aliased_as, alias),
+            Self::Static { aliased_as, .. } => std::mem::replace(aliased_as, alias),
+            Self::Macro { aliased_as, .. } => std::mem::replace(aliased_as, alias),
+        };
     }
 
     #[rustfmt::skip]
@@ -651,6 +671,8 @@ impl std::str::FromStr for MappableCommand {
                         name: cmd.name.to_owned(),
                         doc,
                         args: args.to_string(),
+                        // TODO implement
+                        aliased_as: None
                     }
                 })
                 .ok_or_else(|| anyhow!("No TypableCommand named '{}'", s))
@@ -658,6 +680,8 @@ impl std::str::FromStr for MappableCommand {
             helix_view::input::parse_macro(suffix).map(|keys| Self::Macro {
                 name: s.to_string(),
                 keys,
+                // TODO implement
+                aliased_as: None
             })
         } else {
             MappableCommand::STATIC_COMMAND_LIST
@@ -3405,6 +3429,8 @@ pub fn command_palette(cx: &mut Context) {
                         name: cmd.name.to_owned(),
                         args: String::new(),
                         doc: cmd.doc.to_owned(),
+                        // TODO: implement
+                        aliased_as: None
                     }),
             );
 
