@@ -8,6 +8,17 @@
 </picture>
 </h1>
 
+---
+
+> [!Warning]
+> This branch is purposed for `broozelix`
+
+- When `BROOZELIX` environment variable is defined, quit commands are disabled not to quit zellij pane on accident
+- When `BROOT_SOCKET` environment variable is set to `broot` socket path, file directory will be synced with broot
+  file explorer
+
+---
+
 [![Build status](https://github.com/helix-editor/helix/actions/workflows/build.yml/badge.svg)](https://github.com/helix-editor/helix/actions)
 [![GitHub Release](https://img.shields.io/github/v/release/helix-editor/helix)](https://github.com/helix-editor/helix/releases/latest)
 [![Documentation](https://shields.io/badge/-documentation-452859)](https://docs.helix-editor.com/)

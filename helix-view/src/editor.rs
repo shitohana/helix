@@ -1679,6 +1679,8 @@ impl Editor {
                     }
                 }
 
+                
+                open_path_in_broot(self.document(id).and_then(|d| d.path().cloned()));
                 self.replace_document_in_view(view_id, id);
 
                 dispatch(DocumentFocusLost {
@@ -1692,6 +1694,7 @@ impl Editor {
                 let doc = doc_mut!(self, &id);
                 doc.ensure_view_init(view_id);
                 doc.mark_as_focused();
+                open_path_in_broot(doc.path().cloned());
                 return;
             }
             Action::HorizontalSplit | Action::VerticalSplit => {
@@ -1715,6 +1718,7 @@ impl Editor {
                 let doc = doc_mut!(self, &id);
                 doc.ensure_view_init(view_id);
                 doc.mark_as_focused();
+                open_path_in_broot(doc.path().cloned());
                 focus_lost
             }
         };
@@ -1791,6 +1795,7 @@ impl Editor {
         let id = if let Some(id) = id {
             id
         } else {
+            open_path_in_broot(Some(path.to_path_buf()));
             let mut doc = Document::open(
                 &path,
                 None,
@@ -2332,5 +2337,35 @@ impl CursorCache {
 
     pub fn reset(&self) {
         self.0.set(None)
+    }
+}
+
+fn send_to_broot<S: AsRef<str>>(cmd: S) {
+    use std::io::Write;
+    if let Ok(broot_socket) = std::env::var("BROOT_SOCKET") {
+        let mut stream = match std::os::unix::net::UnixStream::connect(broot_socket) {
+            Err(e) => {
+                eprintln!("{e}");
+                return
+            },
+            Ok(s) => s
+        };
+        if let Err(e) = stream.write_all(cmd.as_ref().as_bytes()) {
+            eprintln!("{e}")
+        }
+        if let Err(e) = stream.flush() {
+            eprintln!("{e}")
+        }
+    }
+}
+
+fn open_path_in_broot(path: Option<PathBuf>) {
+    if let Some(path) = path {
+        let abs_path = path
+            .canonicalize()
+            .unwrap_or(path.to_owned());
+        // FIXME: 
+        // I dont like this, because it uses system threads instead of tokio
+        std::thread::spawn(move || send_to_broot(format!("CMD\n:focus {}", abs_path.display())));
     }
 }

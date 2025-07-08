@@ -123,6 +123,7 @@ async fn start_unix_socket_listener(tx: mpsc::Sender<String>) {
         path
     };
 
+    let _ = std::fs::remove_file(&path);
     let listener = match UnixListener::bind(&path) {
         Ok(l) => l,
         Err(e) => {
